@@ -1,0 +1,41 @@
+<snippet>
+	<content><![CDATA[
+#define cd complex<double>
+const double PI = acos(-1);
+
+vector<cd> fft(vector<cd> p, int n, int m) {		// fft =>  m = 1   &&   invfft =>  m = -1
+	if (n == 1) return p;
+	vector<cd> Pe, Po;
+	for (int i = 0; i < n; i += 2) Pe.push_back(p[i]), Po.push_back(p[i + 1]);
+	Pe = fft(Pe, n / 2, m);	Po = fft(Po, n / 2, m);
+	double ang = (m * 2 * PI) / n;
+	cd w(1), w_delta(cos(ang), sin(ang));
+	for (int i = 0; i < n / 2; ++i) {
+		p[i] = Pe[i] + w * Po[i];
+		p[i + n / 2] = Pe[i] - w * Po[i];
+		w *= w_delta;
+	}
+	return p;
+}
+vector<ll> multiply(vector<ll> &a, vector<ll> &b) {
+	vector<cd> fa(a.begin(), a.end()), fb(b.begin(), b.end());
+	// reverse(fa.begin(), fa.end()); reverse(fb.begin(), fb.end());		// if x^n ..... x^0
+	int n = 1, a_size = a.size(), b_size = b.size();
+	while (n <= a_size - 1 + b_size - 1) n <<= 1;
+	fa.resize(n), fb.resize(n);
+
+	fa = fft(fa, n, 1); fb = fft(fb, n, 1);
+	for (int i = 0; i < n; ++i) fa[i] *= fb[i];
+	fa = fft(fa, n, -1);
+
+	vector<ll> res(a_size + b_size - 1);
+	for (int i = 0; i < a_size + b_size - 1; ++i) res[i] = round(fa[i].real() / n);
+	// reverse(res.begin(), res.end());		// if  x^n ..... x^0
+	return res;
+}
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>fastFourierTransform</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.c++</scope>
+</snippet>
