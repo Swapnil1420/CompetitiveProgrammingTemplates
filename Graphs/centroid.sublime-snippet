@@ -1,0 +1,37 @@
+<snippet>
+	<content><![CDATA[
+const int N = 2e5 + 10;
+vector<int> g[N], sz(N, 0), dead(N, 0);
+vector<char> ans(N, '.');
+void populate_sizes(int node, int p = -1) {
+	sz[node] = 1;
+	for (auto nbr : g[node]) {
+		if (nbr != p && !dead[nbr]) {
+			populate_sizes(nbr, node);
+			sz[node] += sz[nbr];
+		}
+	}
+}
+int find_centroid(int sub_Size, int node, int p = -1) {
+	for (auto nbr : g[node]) {
+		if (nbr != p && !dead[nbr] && 2 * sz[nbr] > sub_Size) return find_centroid(sub_Size, nbr, node);
+	}
+	return node;
+}
+void fn(int node, char value_to_assign) {			// example scenerio of assigning chars to nodes
+	populate_sizes(node);
+	int centroid = find_centroid(sz[node], node);
+	ans[centroid] = value_to_assign;
+	dead[centroid] = 1;
+	for (auto nbr : g[centroid]) {
+		if (!dead[nbr]) {
+			fn(nbr, value_to_assign + 1);
+		}
+	}
+}
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>centroid</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.c++</scope>
+</snippet>
