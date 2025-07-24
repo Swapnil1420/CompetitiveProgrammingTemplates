@@ -1,0 +1,41 @@
+<snippet>
+	<content><![CDATA[
+bool getPath(vector<vector<ll>> &g, ll n, vector<ll> &parent) {
+    queue<ll> q;    q.push(0);
+    vector<bool> vis(n, 0); vis[0] = 1;
+    while (!q.empty()) {
+        ll node = q.front();    q.pop();
+        for (int i = 0; i < n; ++i) {
+            if (!vis[i] && g[node][i] > 0) {
+                parent[i] = node;
+                q.push(i);    vis[i] = 1;
+            }
+        }
+    }
+    return vis[n - 1];
+}
+ll findMaxFlow(vector<vector<ll>> &g) {         // graph as matrix
+    ll N = g.size(), maxFlow = 0;
+    vector<ll> parent(N, -1);
+    while (getPath(g, N, parent)) {
+        ll mini = 1e18, temp = N - 1;
+        while (temp != 0) {
+            mini = min(mini, g[parent[temp]][temp]);
+            temp = parent[temp];
+        }
+        temp = N - 1;
+        while (temp != 0) {
+            g[parent[temp]][temp] -= mini;
+            g[temp][parent[temp]] += mini;
+            temp = parent[temp];
+        }
+        maxFlow += mini;
+    }
+    return maxFlow;
+}
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>max_flow</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.c++</scope>
+</snippet>
