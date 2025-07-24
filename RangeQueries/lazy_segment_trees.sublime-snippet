@@ -1,0 +1,81 @@
+<snippet>
+	<content><![CDATA[
+class lazysegtree {
+	vector<ll> v;
+	vector<ll> lazy;
+	int size;
+public:
+	lazysegtree() { size = 0; }
+	lazysegtree(int n) {
+		size = n;
+		v.resize(4 * n, 0);
+		lazy.resize(4 * n, 0);
+	}
+	void build(vector<ll> &a, int l = 0, int r = -1, int node = 0) {
+		if (r == -1) r = size - 1;
+		if (l == r) {
+			v[node] = a[l];
+			return;
+		}
+		int m = l + (r - l) / 2;
+		build(a, l, m, 2 * node + 1);
+		build(a, m + 1, r, 2 * node + 2);
+		v[node] = v[2 * node + 1] + v[2 * node + 2];
+	}
+	ll query(int i, int j, int l = 0, int r = -1, int node = 0) {
+		if (r == -1) r = size - 1;
+		if (lazy[node] != 0) {
+			v[node] += (r - l + 1) * lazy[node];
+			if (l != r) {
+				lazy[2 * node + 1] += lazy[node];
+				lazy[2 * node + 2] += lazy[node];
+			}
+			lazy[node] = 0;
+		}
+		if (j < l || i > r) return 0;
+		else if (l >= i && r <= j) return v[node];
+		int m = l + (r - l) / 2;
+		return query(i, j, l, m, 2 * node + 1) + query(i, j, m + 1, r, 2 * node + 2);
+	}
+	void pointUpdate(int i, ll val, int l = 0, int r = -1, int node = 0) {
+		if (r == -1) r = size - 1;
+		if (l == r) {
+			v[node] += val;
+			return;
+		}
+		int m = l + (r - l) / 2;
+		if (i <= m) pointUpdate(i, val, l, m, 2 * node + 1);
+		else pointUpdate(i, val, m + 1, r, 2 * node + 2);
+		v[node] = v[2 * node + 1] + v[2 * node + 2];
+	}
+	void rangeUpdate(int i, int j, ll val, int l = 0, int r = -1, int node = 0) {
+		if (r == -1) r = size - 1;
+		if (lazy[node] != 0) {
+			v[node] += (r - l + 1) * lazy[node];
+			if (l != r) {
+				lazy[2 * node + 1] += lazy[node];
+				lazy[2 * node + 2] += lazy[node];
+			}
+			lazy[node] = 0;
+		}
+		if (j<l or i>r) return;
+		else if (l >= i && r <= j) {
+			v[node] += (r - l + 1) * val;
+			if (l != r) {
+				lazy[2 * node + 1] += val;
+				lazy[2 * node + 2] += val;
+			}
+			return;
+		}
+		int m = l + (r - l) / 2;
+		rangeUpdate(i, j, val, l, m, 2 * node + 1);
+		rangeUpdate(i, j, val, m + 1, r, 2 * node + 2);
+		v[node] = v[2 * node + 1] + v[2 * node + 2];
+	}
+};
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>lazySegmentTree</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.c++</scope>
+</snippet>

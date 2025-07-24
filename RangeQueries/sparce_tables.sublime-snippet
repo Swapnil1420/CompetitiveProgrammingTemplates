@@ -1,0 +1,29 @@
+<snippet>
+	<content><![CDATA[
+class sparceTable {
+	int LOG, n;
+	vector<vector<ll>> table;
+public:
+	sparceTable() {}
+	sparceTable(int n) {
+		this->n = n;
+		LOG = floor(log2(n));
+		table.resize(n, vector<ll>(LOG + 1));
+	}
+	void build(vector<ll> &a) {
+		for (int i = 0; i < n; ++i) table[i][0] = a[i];
+		for (int j = 1; j <= LOG; ++j)
+			for (int i = 0; i + (1 << j) - 1 < n; ++i)
+				table[i][j] = min(table[i][j - 1], table[i + (1 << (j - 1))][j - 1]);
+	}
+	ll query(int l, int r) {
+		int len = r - l + 1, log = 31 - __builtin_clz(len);
+		return min(table[l][log], table[r - (1 << log) + 1][log]);
+	}
+};
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>sparcetable</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.c++</scope>
+</snippet>

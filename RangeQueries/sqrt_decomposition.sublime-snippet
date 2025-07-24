@@ -1,0 +1,29 @@
+<snippet>
+	<content><![CDATA[
+const int block_size = 500;
+vector<ll> pre;
+void build(vector<ll> &v) {
+	int n = v.size(), size = n / block_size + (n % block_size != 0);
+	pre.resize(size, 1e18);
+	for (int i = 0; i < size; ++i) {
+		ll mini = 1e18, start = block_size * i, end = min(n, (block_size) * (i + 1));
+		for (int j = start; j < end; ++j) {
+			mini = min(mini, v[j]);
+		}
+		pre[i] = mini;
+	}
+}
+ll query(vector<ll> &v, int l, int r) {
+	ll ans = 1e18;
+	for (int i = l; i <= r && i % block_size != 0; ++i) ans = min(ans, v[i]);
+	for (int i = r; i >= l && i % block_size != block_size - 1; --i) ans = min(ans, v[i]);
+	int lb = l / block_size + (l % block_size != 0), rb = r / block_size - (r % block_size != block_size - 1);
+	for (int i = lb; i <= rb; ++i) ans = min(ans, pre[i]);
+	return ans;
+}
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>sqrtDecomposition</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.c++</scope>
+</snippet>
