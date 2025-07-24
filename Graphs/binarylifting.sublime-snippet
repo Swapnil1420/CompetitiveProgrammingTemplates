@@ -1,0 +1,53 @@
+<snippet>
+	<content><![CDATA[
+int LOG;
+vector<int> depth;
+vector<vector<int>> up;
+void dfs(int node, vector<vector<int>> &g, int p = -1) {
+    for (auto nbr : g[node]) {
+        if (nbr != p) {
+            depth[nbr] = depth[node] + 1;
+            up[nbr][0] = node;
+            for (int i = 1; i <= LOG; ++i) {
+                up[nbr][i] = up[up[nbr][i - 1]][i - 1];
+            }
+            dfs(nbr, g, nbr);
+        }
+    }
+}
+void binary_lifting(vector<vector<int>> &g) {           // initilize depth and up
+    int n = g.size(), root = 0;
+    LOG = log2(n - 1) + 1;
+    up.resize(n, vector<int>(LOG + 1));
+    depth.resize(n, 0);
+    dfs(root, g);
+}
+int getKthAncestor(int node, int k) {
+    for (int i = 0; i <= LOG; ++i) {
+        if ((k >> i) & 1) {
+            node = up[node][i];
+            if (node == -1) return -1;
+        }
+    }
+    return node;
+}
+int lca(int a, int b) {
+    if (depth[a] < depth[b]) swap(a, b);
+    int diff = depth[a] - depth[b];
+    for (int i = 0; i <= LOG; ++i) {
+        if (diff & (1 << i)) a = up[a][i];
+    }
+    if (a == b) return a;
+    for (int i = LOG; i >= 0; --i) {
+        if (up[a][i] != up[b][i]) {
+            a = up[a][i];    b = up[b][i];
+        }
+    }
+    return up[a][0];
+}
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>binarylifting</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.c++</scope>
+</snippet>
