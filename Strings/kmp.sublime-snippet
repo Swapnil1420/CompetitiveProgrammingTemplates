@@ -1,0 +1,31 @@
+<snippet>
+	<content><![CDATA[
+vector<int> prefix_function(string &t) {
+	int n = t.size(), j;
+	vector<int> pre(n, 0);
+	for (int i = 1; i < n; ++i) {
+		j = pre[i - 1];
+		while (j > 0 && t[i] != t[j]) j = pre[j - 1];
+		if (t[i] == t[j]) ++j;
+		pre[i] = j;
+	}
+	return pre;
+}
+vector<int> kmp(string &s, string &t) {
+	vector<int> pos, pre = prefix_function(t);
+	int n = s.length(), m = t.length(), i = 0, j = 0;
+	if(!m) pos.push_back(0);
+	while (i < s.length()) {
+		if (s[i] == t[j]) ++i, ++j;
+		else if (j != 0) j = pre[j - 1];
+		else ++i;
+		if (j == m) pos.push_back(i - m);
+	}
+	return pos;
+}
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>kmpalgorithm</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.c++</scope>
+</snippet>

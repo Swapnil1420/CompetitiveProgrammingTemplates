@@ -1,0 +1,20 @@
+<snippet>
+	<content><![CDATA[
+const int P = 53, N = 1e5 + 5;
+vector<ll> p(N + 1, 1);
+vector<ll> genHash(string &s) {
+    if (p[1] == 1) for (int i = 1; i <= N; ++i) p[i] = (p[i - 1] * P) % mod;
+    vector<ll> hash(N + 1, 0);
+    for (int i = 1; i <= s.length(); ++i)    hash[i] = (hash[i - 1] + (s[i - 1] - 'a' + 1) * p[i]) % mod;
+    return hash;
+}
+int getHash(int s, int e, vector<ll> &hash) {       // start and end indx
+    return (((hash[e + 1] - hash[s] + mod) % mod) * p[N - s]) % mod;
+}
+
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>rolling_hash</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.c++</scope>
+</snippet>

@@ -1,0 +1,123 @@
+<snippet>
+	<content><![CDATA[
+class Trie {
+public :
+    struct Node {
+        int cnt, dep;
+        vector<int> indx;
+        unordered_map<char, Node*> children;
+        Node* suffix_link, * output_link;
+        Node() {
+            cnt = 0, dep = 0;
+            suffix_link = output_link = NULL;
+        }
+    };
+    Node *root;
+    Trie() {
+        root = new Node();
+    }
+    int cnt_words_with_prefix(string &s) {
+        Node*temp = root;
+        for (int i = 0; i < s.length(); ++i) {
+            if (temp->children.find(s[i]) == temp->children.end()) return 0;
+            temp = temp->children[s[i]];
+        }
+        return temp->cnt;
+    }
+    void add_word(string &s, int j = -1) {      // j is index given to string being inserted
+        if (j == -1) j = root->cnt;
+        Node*temp = root;
+        ++temp->cnt;
+        for (int i = 0; i < s.length(); ++i) {
+            if (temp->children.find(s[i]) == temp->children.end()) temp->children[s[i]] = new Node();
+            temp = temp->children[s[i]];
+            ++temp->cnt;
+            temp->dep = i + 1;
+        }
+        temp->indx.push_back(j);
+    }
+    vector<int> find_word(string &s) {
+        Node*temp = root;
+        for (int i = 0; i < s.length(); ++i) {
+            if (temp->children.find(s[i]) == temp->children.end()) return { -1}; // -1 if not found
+            temp = temp->children[s[i]];
+        }
+        return temp->indx;  // all indexes
+    }
+    void removalHelper(Node *temp, int &tot_rem) {
+        if (!temp) return;
+        for (auto c_pair : temp->children) {
+            removalHelper(c_pair.second, tot_rem);
+            delete(c_pair.second);
+        }
+        tot_rem -= temp->cnt;
+        temp->cnt = 0;
+        temp->indx.clear();
+        temp->children.clear();
+    }
+    void remove_all_with_prefix(string &s) {
+        Node *temp = root;
+        for (int i = 0; i < s.length(); ++i) {
+            if (temp->children.find(s[i]) == temp->children.end()) return;
+            temp = temp->children[s[i]];
+        }
+        int tot_rem = 0;
+        removalHelper(temp, tot_rem);
+        temp = root;
+        for (int i = 0; i < s.length(); ++i) {
+            temp->cnt -= tot_rem;
+            temp = temp->children[s[i]];
+        }
+    }
+    void setup_suffix_output_links() {
+        root->suffix_link = root;
+        queue<Node*> q;
+        for (auto childNodePairs : root->children) {
+            Node *childNode = childNodePairs.second;
+            childNode->suffix_link = root;
+            q.push(childNode);
+        }
+        while (!q.empty()) {
+            Node*temp = q.front();
+            q.pop();
+            for (auto childNodePairs : temp->children) {
+                char val = childNodePairs.first;
+                Node *childNode = childNodePairs.second;
+                Node *link = temp->suffix_link;
+                while (link->children.find(val) == link->children.end() && link != root) link = link->suffix_link;
+                if (link->children.find(val) == link->children.end()) childNode->suffix_link = root;
+                else childNode->suffix_link = link->children[val];
+                q.push(childNode);
+            }
+            if (temp->suffix_link->indx.size()) temp->output_link = temp->suffix_link;
+            else temp->output_link = temp->suffix_link->output_link;
+        }
+    }
+    vector<vector<int>> find_all_occurances(string &s, int m = -1) {         // m is range of indexes in trie
+        if (m == -1) m = root->cnt;
+        int n = s.length();
+        vector<vector<int>> occurances(m);
+        Node*temp = root;
+        for (int i = 0; i < n; ++i) {
+            while (temp != root && temp->children.find(s[i]) == temp->children.end()) temp = temp->suffix_link;
+            if (temp->children.find(s[i]) != temp->children.end()) temp = temp->children[s[i]];
+            Node * op = temp->output_link;
+            while (op) {
+                for (auto x : op->indx)
+                    occurances[x].push_back(i - op->dep + 1);
+                op = op->output_link;
+            }
+            if (temp->indx.size()) {
+                for (auto x : temp->indx)
+                    occurances[x].push_back(i - temp->dep + 1);
+            }
+        }
+        return occurances;
+    }
+};
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>aho_corasick_and_tries</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.c++</scope>
+</snippet>
