@@ -1,5 +1,6 @@
 <snippet>
 	<content><![CDATA[
+// LINES
 /*
 1. mi > mi+1, minimum.
 2. mi > mi+1, maximum.
@@ -71,6 +72,50 @@ struct CHT {
 		return val(ptr, x);
 	}
 };
+
+// POINTS
+struct Point {
+    int x, y;
+    bool operator < (Point P) const {
+        if (x == P.x) return y < P.y;
+        else return x < P.x;
+    }
+    bool operator == (Point P) const {
+        return (x == P.x && y == P.y);
+    }
+};
+
+bool cw(Point a, Point b, Point c) {
+    return a.x * (c.y - b.y) + b.x * (a.y - c.y) + c.x * (b.y - a.y) > 0;
+}
+bool ccw(Point a, Point b, Point c) {
+    return a.x * (c.y - b.y) + b.x * (a.y - c.y) + c.x * (b.y - a.y) < 0;
+}
+bool cll(Point a, Point b, Point c) {
+    return a.x * (c.y - b.y) + b.x * (a.y - c.y) + c.x * (b.y - a.y) == 0;
+}
+
+vector<Point> convex_hull(vector<Point> points) {       // Not adding relaxed vertices
+    if (points.size() <= 2) return points;
+    sort(points.begin(), points.end());
+    vector<Point> up, down;
+    Point first = points[0], last = points.back();
+    for (int i = 1; i < points.size(); i++) {
+        if (i == 0 || i == points.size() - 1 || cw(first, points[i], last)) {
+            while (up.size() >= 2 && !cw(up[up.size() - 2], up[up.size() - 1], points[i])) up.pop_back();
+            up.push_back(points[i]);
+        }
+        if (i == 0 || i == points.size() - 1 || ccw(first, points[i], last)) {
+            while (down.size() >= 2 && !ccw(down[down.size() - 2], down[down.size() - 1], points[i])) down.pop_back();
+            down.push_back(points[i]);
+        }
+    }
+    points.clear();
+    for (int i = 0; i < up.size(); i++) points.push_back(up[i]);
+    for (int i = 0; i < up.size(); i++) points.push_back(down[i]);
+    uniq(points);
+    return points;
+}
 ]]></content>
 	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
 	<tabTrigger>convexHullTrick</tabTrigger>
