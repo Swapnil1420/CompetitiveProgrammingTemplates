@@ -1,0 +1,21 @@
+<snippet>
+	<content><![CDATA[
+vector<ll> extendedGCD(ll a, ll b) { // Soln to : ax + by = gcd(a,b) in form {x,y,gcd}
+    if (b == 0) return {1, 0, a};
+    vector<ll> res = extendedGCD(b, a % b);
+    return {res[1], res[0] - (a / b)*res[1], res[2]};
+}
+vector<ll> solveLinerDiophantineEqn(ll a, ll b, ll c) { // Soln to : ax + by = c
+    ll g = gcd(a, b);
+    if (c % g) return { (ll)1e18, (ll)1e18};
+    ll k = c / g;
+    vector<ll> soln = extendedGCD(a, b);    // Finding soln to ax' + by' = gcd(a,b) where x' = x/k & y' = y/k
+    soln[0] *= k; soln[1] *= k;
+    return soln;        // general solutions are {x0 + b/g*lamda, y0 - a/g*lambda}
+}
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>diophantineEquationSolutions</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.c++</scope>
+</snippet>

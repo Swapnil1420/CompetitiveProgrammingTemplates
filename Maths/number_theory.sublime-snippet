@@ -1,14 +1,16 @@
 <snippet>
 	<content><![CDATA[
 vector<int> primes(int n) {
-    vector<int> p(n + 1);
+    vector<int> p(n + 1), t(n + 1);
+    iota(t.begin(), t.end(), 0);
     iota(p.begin(), p.end(), 0);
     for (int i = 2; i * i <= n; ++i) {
         if (p[i] == i) for (int j = i * i; j <= n; j += i) if (p[j] == j) p[j] = i;
     }
     vector<int> prime;
     for (int i = 2; i <= n; ++i)    if (p[i] == i) prime.push_back(i);
-    return prime;
+    for (int i = 2; i <= n; ++i) if (p[i] == i) for (int j = i; j <= n; j += i) t[j] = (t[j] / i * (i - 1)); // nums upto i such that gcd(num,i) = 1
+    return t;
 }
 vector<int> factors(int n) {
     vector<int> f;

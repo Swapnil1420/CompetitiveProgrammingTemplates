@@ -1,0 +1,76 @@
+<snippet>
+	<content><![CDATA[
+class segtree2d {
+	int n, m;
+	vector<vector<ll>> v;
+
+	void buildY(const vector<vector<ll>>& A, int nodeX, int lx, int rx, int nodeY, int ly, int ry) {
+		if (ly == ry) {
+			if (lx == rx)	v[nodeX][nodeY] = A[lx][ly];
+			else v[nodeX][nodeY] = v[2 * nodeX + 1][nodeY] + v[2 * nodeX + 2][nodeY];
+		} else {
+			int my = (ly + ry) >> 1;
+			buildY(A, nodeX, lx, rx, 2 * nodeY + 1, ly, my);
+			buildY(A, nodeX, lx, rx, 2 * nodeY + 2, my + 1, ry);
+			v[nodeX][nodeY] = v[nodeX][2 * nodeY + 1] + v[nodeX][2 * nodeY + 2];
+		}
+	}
+	void buildX(const vector<vector<ll>>& A, int nodeX, int lx, int rx) {
+		if (lx != rx) {
+			int mx = (lx + rx) >> 1;
+			buildX(A, 2 * nodeX + 1, lx, mx);
+			buildX(A, 2 * nodeX + 2, mx + 1, rx);
+		}
+		buildY(A, nodeX, lx, rx, 0, 0, m - 1);
+	}
+	ll queryY(int nodeX, int nodeY, int ly, int ry, int qly, int qry) const {
+		if (qly > ry || qry < ly) return 0;
+		if (ly >= qly && ry <= qry) return v[nodeX][nodeY];
+		int my = (ly + ry) >> 1;
+		return queryY(nodeX, 2 * nodeY + 1, ly, my, qly, qry) + queryY(nodeX, 2 * nodeY + 2, my + 1, ry, qly, qry);
+	}
+	ll queryX(int nodeX, int lx, int rx, int qlx, int qrx, int qly, int qry) const {
+		if (qlx > rx || qrx < lx) return 0;
+		if (lx >= qlx && rx <= qrx)	return queryY(nodeX, 0, 0, m - 1, qly, qry);
+		int mx = (lx + rx) >> 1;
+		return queryX(2 * nodeX + 1, lx, mx, qlx, qrx, qly, qry) + queryX(2 * nodeX + 2, mx + 1, rx, qlx, qrx, qly, qry);
+	}
+	void updateY(int nodeX, int lx, int rx, int nodeY, int ly, int ry, int uy, ll val) {
+		if (ly == ry) {
+			if (lx == rx) v[nodeX][nodeY] = val;
+			else v[nodeX][nodeY] = v[2 * nodeX + 1][nodeY] + v[2 * nodeX + 2][nodeY];
+		} else {
+			int my = (ly + ry) >> 1;
+			if (uy <= my) updateY(nodeX, lx, rx, 2 * nodeY + 1, ly, my, uy, val);
+			else updateY(nodeX, lx, rx, 2 * nodeY + 2, my + 1, ry, uy, val);
+			v[nodeX][nodeY] = v[nodeX][2 * nodeY + 1] + v[nodeX][2 * nodeY + 2];
+		}
+	}
+	void updateX(int nodeX, int lx, int rx, int ux, int uy, ll val) {
+		if (lx != rx) {
+			int mx = (lx + rx) >> 1;
+			if (ux <= mx) updateX(2 * nodeX + 1, lx, mx, ux, uy, val);
+			else updateX(2 * nodeX + 2, mx + 1, rx, ux, uy, val);
+		}
+		updateY(nodeX, lx, rx, 0, 0, m - 1, uy, val);
+	}
+public:
+	segtree2d(const vector<vector<ll>>& A) {
+		n = A.size();
+		m = n ? A[0].size() : 0;
+		v.assign(4 * n, vector<ll>(4 * m, 0));
+		if (n && m) buildX(A, 0, 0, n - 1);
+	}
+	ll query(int x1, int y1, int x2, int y2) const {
+		return queryX(0, 0, n - 1, x1, x2, y1, y2);
+	}
+	void update(int x, int y, ll val) {
+		updateX(0, 0, n - 1, x, y, val);
+	}
+};
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>segmentree2d</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.c++</scope>
+</snippet>

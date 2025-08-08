@@ -1,0 +1,64 @@
+<snippet>
+	<content><![CDATA[
+class WaveletTree {
+public:
+    ll low, high;
+    WaveletTree *left = nullptr, *right = nullptr;
+    vector<ll> b;
+    WaveletTree(const vector<ll> &A, ll x, ll y) {
+        ll sz = A.size();
+        low = x;    high = y;
+        if (sz <= 0 || low > high) return;
+        ll mid = (low + high) / 2;
+        b.reserve(sz + 1);
+        b.push_back(0);
+        for (int i = 0; i < sz; ++i) b.push_back(b.back() + (A[i] <= mid));
+        vector<ll> left_part, right_part;
+        left_part.reserve(b.back());
+        right_part.reserve(sz - b.back());
+        for (int i = 0; i < sz; ++i) {
+            if (A[i] <= mid) left_part.push_back(A[i]);
+            else right_part.push_back(A[i]);
+        }
+        if (low == high) return;
+        left = new WaveletTree(left_part, low, mid);
+        right = new WaveletTree(right_part, mid + 1, high);
+    }
+    ll count(ll l, ll r, ll k) {
+        if (l > r || k < low || k > high) return 0;
+        if (low == high) return r - l + 1;
+        ll mid = (low + high) / 2,  left_l = b[l], left_r = b[r + 1] - 1;
+        if (k <= mid) return left->count(left_l, left_r, k);
+        else {
+            ll right_l = l - b[l], right_r = r - b[r + 1];
+            return right->count(right_l, right_r, k);
+        }
+    }
+    ll kth_smallest(int l, int r, int k) {
+        if (low == high) return low;
+        ll inLeft = b[r + 1] - b[l], left_l = b[l], left_r = b[r + 1] - 1;
+        if (k <= inLeft)
+            return left->kth_smallest(left_l, left_r, k);
+        else {
+            ll right_l = l - b[l], right_r = r - b[r + 1];
+            return right->kth_smallest(right_l, right_r, k - inLeft);
+        }
+    }
+    ll lte(int l, int r, int k) {
+        if (l > r or low > k) return 0;
+        if (high <= k) return r - l + 1;
+        ll mid = (low + high) / 2;
+        ll left_l = b[l], left_r = b[r + 1] - 1, right_l = l - b[l], right_r = r - b[r + 1];
+        return left->lte(left_l, left_r, k) + right->lte(right_l, right_r, k);
+    }
+    ~WaveletTree() {
+        delete left;
+        delete right;
+    }
+};
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>waveletrees</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.c++</scope>
+</snippet>

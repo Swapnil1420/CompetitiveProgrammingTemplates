@@ -1,59 +1,57 @@
 <snippet>
 	<content><![CDATA[
-class SuffixArrays {
-public:
-	const int MAX_N = 100010;
-	int n;	string s;
-	vector<int> RA, SA, tempRA, tempSA, lcp, rank;
-	SuffixArrays() {}
-	SuffixArrays(string &str) {
-		s = str;
-		n = s.length();
-		RA.resize(MAX_N);	SA.resize(MAX_N);
-		tempRA.resize(MAX_N);	tempSA.resize(MAX_N);
-		lcp.resize(MAX_N); rank.resize(MAX_N);
-		for (int i = 0; i < n; ++i) {
-			RA[i] = s[i];
-			SA[i] = i;
-		}
-		for (int k = 1; k < n; k *= 2) {
-			countingSort(k);
-			countingSort(0);
-			int r = 0;
-			tempRA[SA[0]] = r;
-			for (int i = 1; i < n; ++i) {
-				tempRA[SA[i]] = (RA[SA[i]] == RA[SA[i - 1]] && RA[SA[i] + k] == RA[SA[i - 1] + k]) ? r : ++r;
-			}
-			for (int i = 0; i < n; ++i) RA[i] = tempRA[i];
-			if (RA[SA[n - 1]] == n - 1) break;
-		}
-		kasai();
-	}
-	void kasai() {
-		for (int i = 0; i < n; ++i) 	rank[SA[i]] = i;
-		for (int i = 0, k = 0; i < n; ++i, k = max(k - 1, 0)) {
-			if (rank[i] == n - 1) {
-				k = 0;	continue;
-			}
-			int j = SA[rank[i] + 1];
-			while (i + k < n && j + k < n && s[i + k] == s[j + k]) ++k;
-			lcp[rank[i]] = k;
-		}
-	}
-	void countingSort(int k) {
-		int i, t, sum = 0, maxi = max(300, n);
-		vector<int> c(MAX_N, 0);
-		for (int i = 0; i < n; ++i)	c[i + k < n ? RA[i + k] : 0]++;
-		for (int i = 0; i < maxi; ++i) {
-			t = c[i];	c[i] = sum;	sum += t;
-		}
-		for (int i = 0; i < n; ++i) {
-			tempSA[c[SA[i] + k < n ? RA[SA[i] + k] : 0]++] = SA[i];
-		}
-		for (int i = 0; i < n; ++i) {
-			SA[i] = tempSA[i];
-		}
-	}
+struct SuffixArray {
+    string s; int n;
+    vector<int> SA, RA, tempSA, tempRA, LCP, rank_;
+
+    SuffixArray(const string& str) : s(str), n(str.size()) {
+        SA.resize(n);   RA.resize(n);   tempSA.resize(n);
+        tempRA.resize(n);   LCP.resize(n);  rank_.resize(n);
+        for (int i = 0; i < n; ++i) {
+            SA[i] = i;
+            RA[i] = (unsigned char)s[i];
+        }
+        for (int k = 1; k < n; k <<= 1) {
+            countingSort(k);
+            countingSort(0);
+            int r = 0;
+            tempRA[SA[0]] = r;
+            for (int i = 1; i < n; ++i) {
+                int cur1 = RA[SA[i]] , cur2 = (SA[i] + k < n ? RA[SA[i] + k] : -1);
+                int prev1 = RA[SA[i - 1]], prev2 = (SA[i - 1] + k < n ? RA[SA[i - 1] + k] : -1);
+                if (cur1 != prev1 || cur2 != prev2) ++r;
+                tempRA[SA[i]] = r;
+            }
+            RA = tempRA;
+            if (RA[SA[n - 1]] == n - 1) break;
+        }
+        buildLCP();
+    }
+    void countingSort(int k) {
+        int maxi = max(256, n);
+        vector<int> c(maxi + 1, 0);
+        for (int i = 0; i < n; ++i) {
+            int idx = (SA[i] + k < n ? RA[SA[i] + k] + 1 : 0);
+            c[idx]++;
+        }
+        for (int i = 1; i <= maxi; ++i) c[i] += c[i - 1];
+        for (int i = n - 1; i >= 0; --i) {
+            int idx = (SA[i] + k < n ? RA[SA[i] + k] + 1 : 0);
+            tempSA[--c[idx]] = SA[i];
+        }
+        SA = tempSA;
+    }
+    void buildLCP() {
+        for (int i = 0; i < n; ++i) rank_[SA[i]] = i;
+        for (int i = 0, h = 0; i < n; ++i) {
+            if (rank_[i] > 0) {
+                int j = SA[rank_[i] - 1];
+                while (i + h < n && j + h < n && s[i + h] == s[j + h]) h++;
+                LCP[rank_[i]] = h;
+                if (h > 0) h--;
+            }
+        }
+    }
 };
 ]]></content>
 	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
