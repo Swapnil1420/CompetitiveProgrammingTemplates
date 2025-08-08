@@ -1,0 +1,35 @@
+<snippet>
+	<content><![CDATA[
+const int N = 3e5 + 5;
+int timer = -1;
+vector<ll> in(N), out(N), hashToNode(N), A(N, 0);    // node i subtree -> in[i]... out[i] & build tree on A
+
+void dfsEdges(vector<vector<pair<ll, ll>>> &g, int node = 0, int p = -1, ll val = 0) {
+    in[node] = ++timer;
+    hashToNode[timer] = node;
+    A[in[node]] = val + (p == -1 ? 0 : A[in[p]]);               // change
+    for (auto nbrp : g[node]) {
+        if (nbrp.F != p) {
+            dfsEdges(g, nbrp.F, node, nbrp.S);
+        }
+    }
+    out[node] = timer;
+}
+
+void dfsVertex(vector<vector<ll>> &g, vector<ll> &val, int node = 0, int p = -1) {
+    in[node] = ++timer;
+    hashToNode[timer] = node;
+    A[in[node]] = val[node] + (p == -1 ? 0 : A[in[p]]);         // change
+    for (auto nbr : g[node]) {
+        if (nbr != p) {
+            dfsVertex(g, val, nbr, node);
+        }
+    }
+    out[node] = timer;
+}
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>eulerTour</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.c++</scope>
+</snippet>

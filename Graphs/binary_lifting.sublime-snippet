@@ -8,17 +8,17 @@ void dfs(int node, vector<vector<int>> &g, int p = -1) {
         if (nbr != p) {
             depth[nbr] = depth[node] + 1;
             up[nbr][0] = node;
-            for (int i = 1; i <= LOG; ++i) {
+            for (int i = 1; i <= LOG && up[nbr][i - 1] != -1; ++i) {
                 up[nbr][i] = up[up[nbr][i - 1]][i - 1];
             }
-            dfs(nbr, g, nbr);
+            dfs(nbr, g, node);
         }
     }
 }
 void binary_lifting(vector<vector<int>> &g) {           // initilize depth and up
     int n = g.size(), root = 0;
-    LOG = log2(n - 1) + 1;
-    up.resize(n, vector<int>(LOG + 1));
+    LOG = log2(n) + 1;
+    up.resize(n, vector<int>(LOG + 1, -1));
     depth.resize(n, 0);
     dfs(root, g);
 }

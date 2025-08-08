@@ -9,6 +9,10 @@ public:
 		size = n;
 		v.resize(4 * n, 0);
 	}
+	void init(int n){
+		size = n;
+		v.resize(4 * n, 0);
+	}
 	void build(vector<ll> &a, int l = 0, int r = -1, int node = 0) {
 		if (r == -1) r = size - 1;
 		if (l == r) {
