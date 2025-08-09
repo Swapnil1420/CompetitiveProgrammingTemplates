@@ -51,7 +51,8 @@ Treap* merge(Treap *l, Treap *r) {
 
 array<Treap*, 2> split(Treap *me, ll nInLeft) {
     if (me == NULL) return {NULL, NULL};
-    if (me->subtreeSize == nInLeft) return {me, NULL};
+    if (nInLeft <= 0) return {NULL, me};
+    if (me->subtreeSize <= nInLeft) return {me, NULL};
     prop(me);
     if (size(me->kids[0]) >= nInLeft) {
         array<Treap*, 2> leftRes = split(me->kids[0], nInLeft);
