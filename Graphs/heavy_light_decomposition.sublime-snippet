@@ -1,0 +1,77 @@
+<snippet>
+	<content><![CDATA[
+struct HLD {
+    int n;
+    vector<vector<int>> adj;
+    vector<int> parent, depth, heavy, head, pos, subsize;
+    vector<ll> value;           // original node values
+    vector<ll> baseArray;       // values in segment tree order
+    int curPos;
+    segtree seg;                // need segtree
+    bool excludeLCA;
+
+    HLD(int _n): n(_n) {
+        parent.assign(n, -1);
+        depth.assign(n, 0);
+        heavy.assign(n, -1);
+        head.assign(n, 0);
+        pos.assign(n, 0);
+        subsize.assign(n, 0);
+        curPos = 0;
+        excludeLCA = 0;
+    }
+    int dfs(int u, int p) {
+        parent[u] = p;
+        subsize[u] = 1;
+        int maxSub = 0;
+        for (int v : adj[u]) if (v != p) {
+                depth[v] = depth[u] + 1;
+                int sz = dfs(v, u);
+                subsize[u] += sz;
+                if (sz > maxSub) {
+                    maxSub = sz;
+                    heavy[u] = v;
+                }
+            }
+        return subsize[u];
+    }
+    void decompose(int u, int h) {
+        head[u] = h;
+        pos[u] = curPos;
+        baseArray[curPos++] = value[u];
+        if (heavy[u] != -1) decompose(heavy[u], h);
+        for (int v : adj[u]) if (v != parent[u] && v != heavy[u]) decompose(v, v);
+    }
+    void init(vector<vector<int>> adj_, vector<ll> value_, int root = 0) {
+        adj = adj_;
+        value = value_;
+        dfs(root, -1);
+        baseArray.assign(n, 0);
+        curPos = 0;
+        decompose(root, root);
+        seg.init(n);
+        seg.build(baseArray);
+    }
+    ll query(int u, int v) {
+        ll res = 0;
+        while (head[u] != head[v]) {
+            if (depth[head[u]] > depth[head[v]]) swap(u, v);
+            res = max(res, seg.query(pos[head[v]], pos[v]));                                          // change
+            v = parent[head[v]];
+        }
+        if (depth[u] > depth[v]) swap(u, v);
+        if (pos[u] + excludeLCA <= pos[v]) res = max(res, seg.query(pos[u] + excludeLCA, pos[v]));    // change
+        return res;
+    }
+    void update(int u, ll val) {                                // set index u to val
+        value[u] = val;
+        baseArray[pos[u]] = val;
+        seg.update(pos[u], val);
+    }
+};
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>heavyLightDecomposition</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.c++</scope>
+</snippet>
