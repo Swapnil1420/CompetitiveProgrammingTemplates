@@ -3,6 +3,7 @@
 struct Treap {
     ll data, priority;
     array<Treap*, 2> kids;
+    Treap *parent;
     ll subtreeSize, sum, toProp;
     Treap(ll data);
 };
@@ -33,12 +34,16 @@ Treap* merge(Treap *l, Treap *r) {
     if (r == NULL) return l;
     prop(l); prop(r);
     if (l->priority < r->priority) {
+        if (l->kids[1]) l->kids[1]->parent = NULL;
         l->kids[1] = merge(l->kids[1], r);
+        if (l->kids[1]) l->kids[1]->parent = l;
         recalc(l);
         return l;
     }
     else {
+        if (r->kids[0]) r->kids[0]->parent = NULL;
         r->kids[0] = merge(l, r->kids[0]);
+        if (r->kids[0]) r->kids[0]->parent = r;
         recalc(r);
         return r;
     }
@@ -46,17 +51,22 @@ Treap* merge(Treap *l, Treap *r) {
 
 array<Treap*, 2> split(Treap *me, ll nInLeft) {
     if (me == NULL) return {NULL, NULL};
+    if (me->subtreeSize == nInLeft) return {me, NULL};
     prop(me);
     if (size(me->kids[0]) >= nInLeft) {
         array<Treap*, 2> leftRes = split(me->kids[0], nInLeft);
+        if (me->kids[0]) me->kids[0]->parent = NULL;
         me->kids[0] = leftRes[1];
+        if (me->kids[0]) me->kids[0]->parent = me;
         recalc(me);
         return {leftRes[0], me};
     }
     else {
         nInLeft = nInLeft - size(me->kids[0]) - 1;
         array<Treap*, 2> rightRes = split(me->kids[1], nInLeft);
+        if (me->kids[1]) me->kids[1]->parent = NULL;
         me->kids[1] = rightRes[0];
+        if (me->kids[1]) me->kids[1]->parent = me;
         recalc(me);
         return {me, rightRes[1]};
     }
@@ -68,6 +78,7 @@ Treap::Treap(ll data) {
     this->toProp = 0;
     this->data = data;
     this->priority = (rng() % mod);
+    this->parent = NULL;
     recalc(this);
 }
 
@@ -75,6 +86,11 @@ Treap* rangeAdd(Treap* me, ll l, ll r, ll toAdd) {
     array<Treap*, 2> a = split(me, l), b = split(a[1], r - l + 1);
     b[0]->toProp += toAdd;
     return merge(a[0], merge(b[0], b[1]));
+}
+
+Treap *findRoot(Treap *me) {
+    if (me == NULL or me->parent == NULL) return me;
+    return findRoot(me->parent);
 }
 
 void printTreap(Treap *me) {
